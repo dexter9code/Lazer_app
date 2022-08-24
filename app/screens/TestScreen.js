@@ -1,84 +1,73 @@
-import React from "react";
-import { View, Text, TextInput, StyleSheet, Button } from "react-native";
-import { Formik } from "formik";
-
-import { userSchema } from "../components/UserSchema";
-import AppFormField from "../components/AppFormField";
-import FormError from "../components/FormError";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Button,
+  Animated,
+  TouchableOpacity,
+  PanResponder,
+} from "react-native";
 
 const TestScreen = () => {
+  // const opacity = useState(new Animated.Value(0))[0];
+
+  // const moveBall = () => {
+  //   Animated.timing(opacity, {
+  //     toValue: 1,
+  //     duration: 1000,
+  //     useNativeDriver: false,
+  //   }).start();
+  // };
+  // const retriveBall = () => {
+  //   Animated.timing(opacity, {
+  //     toValue: 0,
+  //     duration: 1000,
+  //     useNativeDriver: true,
+  //   }).start();
+  // };
+
+  const pan = useState(new Animated.ValueXY())[0];
+
+  const panResponder = useState(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: () => {
+        pan.setOffset({
+          x: pan.x._value,
+          y: pan.y._value,
+        });
+      },
+      onPanResponderMove: (_, gesture) => {
+        pan.x.setValue(gesture.dx);
+        pan.y.setValue(gesture.dy);
+      },
+      onPanResponderRelease: () => {
+        pan.flattenOffset();
+      },
+    })
+  )[0];
   return (
     <View style={styles.container}>
-      <Formik
-        initialValues={{
-          name: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-        }}
-        validationSchema={userSchema}
-        onSubmit={(values) => console.log(values)}
-      >
-        {({
-          handleChange,
-          handleBlur,
-          handleSubmit,
-          touched,
-          errors,
-          values,
-        }) => (
-          <View>
-            {/* refactor of formik  */}
-
-            <View>
-              <AppFormField
-                name={"name"}
-                placeholder="Name"
-                autoCorrect={false}
-              />
-              <FormError error={errors.name} visible={touched.name} />
-            </View>
-
-            {/* normal way of formik */}
-
-            <View>
-              <TextInput
-                placeholder="Email"
-                autoCorrect={false}
-                onChangeText={handleChange("email")}
-                value={values.email}
-                onBlur={handleBlur("email")}
-              />
-              {errors.email && touched.email ? (
-                <Text>{errors.email}</Text>
-              ) : null}
-            </View>
-            <View>
-              <TextInput
-                placeholder="Password"
-                onChangeText={handleChange("password")}
-                value={values.password}
-                onBlur={handleBlur("password")}
-              />
-              {errors.password && touched.password ? (
-                <Text>{errors.password}</Text>
-              ) : null}
-            </View>
-            <View>
-              <TextInput
-                placeholder="confirmPassword"
-                onChangeText={handleChange("confirmPassword")}
-                value={values.confirmPassword}
-                onBlur={handleBlur("confirmPassword")}
-              />
-              {errors.confirmPassword && touched.confirmPassword ? (
-                <Text>{errors.confirmPassword}</Text>
-              ) : null}
-            </View>
-            <Button onPress={handleSubmit} title="submit" />
-          </View>
-        )}
-      </Formik>
+      <Animated.View
+        style={[
+          {
+            width: 100,
+            height: 100,
+            borderRadius: 100 / 2,
+            transform: [{ translateX: pan.x }, { translateY: pan.y }],
+            backgroundColor: "dodgerblue",
+          },
+        ]}
+        {...panResponder.panHandlers}
+      />
+      {/* <TouchableOpacity onPress={moveBall}>
+        <Text>Press To Animated</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={retriveBall}>
+        <Text>Original Place</Text>
+      </TouchableOpacity> */}
     </View>
   );
 };
